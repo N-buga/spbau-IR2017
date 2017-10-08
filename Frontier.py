@@ -1,19 +1,22 @@
+from UrlQueue import UrlQueue
+
+
 class Frontier:
     def __init__(self, seed_url, pages_bound):
         self.queue = UrlQueue()
-        self.queue.add(seed_url)
+        self.queue.add_url(seed_url)
         self.pages_bound = pages_bound
         self.cnt = 0
 
     def done(self):
-        return self.queue.nextUrl() is None or self.cnt > self.pages_bound
+        return self.queue.has_next() is None or self.cnt > self.pages_bound
 
     def next_site(self):
-        pass
+        return self.queue.next_site()
 
-    def add_url(self):
+    def add_url(self, url):
         self.cnt += 1
-        pass
+        self.queue.add_url(url)
 
-    def releaseSite(self):
-        pass
+    def releaseSite(self, site):
+        self.queue.release_site(site)
