@@ -18,10 +18,9 @@ class Site:
         return False
 
     def next_url(self):
-        if self.iter < len(self.urls):
-            self.iter += 1
-            return self.urls[self.iter - 1]
-        return None
+        # updating
+        self.iter = (self.iter + 1) % len(self.urls)
+        return self.urls[self.iter]
 
     def permit_crawl(self, url):
         return self._rp.can_fetch('bot', url)

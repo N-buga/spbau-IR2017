@@ -25,6 +25,7 @@ class UrlQueue:
 
     def next_site(self):
         site = self.site_queue.popleft()
+        self.site_queue.append(site)
         return site
 
     def release_site(self, site):
