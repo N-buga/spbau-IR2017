@@ -4,10 +4,10 @@ import time
 
 
 class Page:
-    def __init__(self, url, crawl_delay=None):
+    def __init__(self, url, useragent, crawl_delay=None):
         self.url = url
         self.headers = {
-            'User-Agent': 'loaferspider'
+            'User-Agent': useragent
         }
         self.soup = None
         self.crawl_delay = crawl_delay
