@@ -8,7 +8,6 @@ class UrlQueue:
     def __init__(self):
         self.sites = {}
         self.site_queue = deque()
-        self.count_queue_urls = 0
 
     def add_url(self, url):
         parsed_url = parse.urlparse(url)
@@ -22,10 +21,7 @@ class UrlQueue:
 
         self.site_queue.append(site)
 
-        if site.update_urls(url):
-            self.count_queue_urls += 1
-            return True
-        return False
+        return site.update_urls(url)
 
     def next_site(self):
         site = self.site_queue.popleft()
@@ -34,5 +30,5 @@ class UrlQueue:
     def release_site(self, site):
         self.site_queue.append(site)
 
-    def has_next(self):
-        return self.count_queue_urls != 0
+    def has_next_site(self):
+        return len(self.site_queue) != 0

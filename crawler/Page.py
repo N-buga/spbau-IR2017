@@ -1,6 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 
+from urllib.parse import urlparse, urljoin
+
+
+def is_absolute(url):
+    return bool(urlparse(url).netloc)
+
 
 class Page:
     def __init__(self, url):
@@ -11,12 +17,16 @@ class Page:
         self._page = requests.get(self.url)
         self.soup = BeautifulSoup(self._page.text, 'html.parser')
 
-    def extract_urls(self):
+    def extract_urls(self, current_url):
         result = []
         if not self.allow_follow():
             return result
-        for link in self.soup.find_all('a'):
-            result.append(link.get('href'))
+        for html_link in self.soup.find_all('a'):
+            link = html_link.get('href')
+            if is_absolute(link):
+                result.append(link)
+            else:
+                result.append(urljoin(current_url, link))
         return result
 
     def allow_cache(self):
