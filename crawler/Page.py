@@ -21,7 +21,7 @@ class Page:
     def retrieve(self):
         initial_time = time.time()
         self._page = requests.get(self.url, headers=self.headers)
-        time_to_wait = initial_time - time.time()
+        time_to_wait = time.time() - initial_time
         if self.crawl_delay is not None and time_to_wait > self.crawl_delay:
             time_to_wait = self.crawl_delay
         status_code = self._page.status_code

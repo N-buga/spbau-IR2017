@@ -33,3 +33,12 @@ class UrlQueue:
 
     def has_next_site(self):
         return len(self.site_queue) != 0
+
+    def add_url_if_site_exists(self, url):
+        parsed_url = parse.urlparse(url)
+        hostname = parsed_url.hostname
+        if hostname in self.sites.keys():
+            site = self.sites[hostname]
+            self.site_queue.append(site)
+            return site.update_urls(url)
+        return False

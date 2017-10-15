@@ -8,7 +8,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_for_docs):
         os.mkdir(dir_for_docs)
 
-    frontier = Frontier('https://www.palantir.com/careers/')
-    crawler = Crawler(5, frontier, dir_for_docs)
+    frontier = Frontier('https://www.palantir.com/careers/', 5)
+    crawler = Crawler(frontier, dir_for_docs)
 
     crawler.run()
