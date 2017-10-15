@@ -6,7 +6,7 @@ class Site:
         self.iter = 0
         self.urls = {0: self.hostname}
         self._rp = urobot.RobotFileParser()
-        self._rp.set_url(hostname + 'robots.txt')
+        self._rp.set_url(hostname + '/robots.txt')
         self._rp.read()
 
     def update_urls(self, url):
