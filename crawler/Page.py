@@ -47,7 +47,7 @@ class Page:
         return self.check_permission('NOFOLLOW')
 
     def check_permission(self, perm):
-        for tag in self.soup.find_all('meta', name='ROBOTS'):
+        for tag in self.soup.find_all('ROBOTS', 'meta'):
             if perm in tag['content'].split(', '):
                 return False
         return True

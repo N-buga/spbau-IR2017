@@ -1,6 +1,6 @@
-from collections import deque
-from urllib.parse import urlparse
+from urllib import parse
 
+from collections import deque
 from crawler.Site import Site
 
 
@@ -11,12 +11,16 @@ class UrlQueue:
         self.count_queue_urls = 0
 
     def add_url(self, url):
-        hostname = urlparse(url).hostname
+        parsed_url = parse.urlparse(url)
+        hostname = parsed_url.hostname
+        scheme = parsed_url.scheme
         if hostname not in self.sites.keys():
-            site = Site(hostname)
+            site = Site(scheme, hostname)
             self.sites[hostname] = site
         else:
             site = self.sites[hostname]
+
+        self.site_queue.append(site)
 
         if site.update_urls(url):
             self.count_queue_urls += 1
