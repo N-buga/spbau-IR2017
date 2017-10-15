@@ -9,7 +9,7 @@ class Page:
 
     def retrieve(self):
         self._page = requests.get(self.url)
-        self.soup = BeautifulSoup(self._page, 'html.parser')
+        self.soup = BeautifulSoup(self._page.text, 'html.parser')
 
     def extract_urls(self):
         result = []
@@ -29,7 +29,7 @@ class Page:
         return self.check_permission('NOFOLLOW')
 
     def check_permission(self, perm):
-        for tag in self.soup.find_all('meta', name='ROBOTS'):
+        for tag in self.soup.find_all('ROBOTS', 'meta'):
             if perm in tag['content'].split(', '):
                 return False
         return True
