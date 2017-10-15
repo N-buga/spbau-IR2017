@@ -25,3 +25,6 @@ class Site:
 
     def permit_crawl(self, url):
         return self._rp.can_fetch('bot', url)
+
+    def get_crawl_delay(self, useragent):
+        return self._rp.crawl_delay(useragent)

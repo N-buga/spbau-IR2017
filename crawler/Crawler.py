@@ -4,6 +4,8 @@ from crawler.Page import Page
 
 
 class Crawler:
+    USERAGENT = 'loaferspider'
+
     def __init__(self, docs_bound, frontier, dir_to_save):
         self.docs_bound = docs_bound
         self.frontier = frontier
@@ -19,7 +21,7 @@ class Crawler:
         while not self.frontier.done() and stored_docs < self.docs_bound:
             website = self.frontier.next_site()
             current_url = website.next_url()
-            page = Page(current_url)
+            page = Page(current_url, self.USERAGENT, website.get_crawl_delay(self.USERAGENT))
             page.retrieve()
             if website.permit_crawl(current_url):
                 if page.allow_cache():

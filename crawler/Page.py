@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import time
 
 from urllib.parse import urlparse, urljoin
 
@@ -9,13 +10,30 @@ def is_absolute(url):
 
 
 class Page:
-    def __init__(self, url):
+    def __init__(self, url, useragent, crawl_delay=None):
         self.url = url
+        self.headers = {
+            'User-Agent': useragent
+        }
         self.soup = None
+        self.crawl_delay = crawl_delay
 
     def retrieve(self):
-        self._page = requests.get(self.url)
+        initial_time = time.time()
+        self._page = requests.get(self.url, headers=self.headers)
+        time_to_wait = initial_time - time.time()
+        if self.crawl_delay is not None and time_to_wait > self.crawl_delay:
+            time_to_wait = self.crawl_delay
+        status_code = self._page.status_code
+        time.sleep(10 * time_to_wait)
+
+        if 400 <= status_code < 600:
+            # to make sure that we do not fetch anything
+            # from a previous site as from this one
+            self.Soup = None
+            return False
         self.soup = BeautifulSoup(self._page.text, 'html.parser')
+        return True
 
     def extract_urls(self, current_url):
         result = []
