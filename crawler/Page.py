@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import time
 
 
 class Page:
@@ -11,8 +12,11 @@ class Page:
         self.soup = None
 
     def retrieve(self):
+        initial_time = time.time()
         self._page = requests.get(self.url, headers=self.headers)
+        response_delay = initial_time - time.time()
         status_code = self._page.status_code
+        time.sleep(10 * response_delay)
         if 400 <= status_code < 600:
             # to make sure that we do not fetch anything
             # from a previous site as from this one
