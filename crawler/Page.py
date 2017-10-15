@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 class Page:
     def __init__(self, url):
         self.url = url
@@ -8,10 +9,10 @@ class Page:
 
     def retrieve(self):
         self._page = requests.get(self.url)
+        self.soup = BeautifulSoup(self._page, 'html.parser')
 
     def extract_urls(self):
         result = []
-        self.soup = BeautifulSoup(self._page, 'html.parser')
         if not self.allow_follow():
             return result
         for link in self.soup.find_all('a'):
@@ -32,3 +33,6 @@ class Page:
             if perm in tag['content'].split(', '):
                 return False
         return True
+
+    def get_text(self):
+        return self._page.text
