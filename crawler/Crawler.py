@@ -27,6 +27,6 @@ class Crawler:
 
     def store_document(self, url, text):
         file_name = self.create_file_name(url)
-        with open(file_name, 'w') as  file_to:
+        with open(file_name, 'w') as file_to:
             print(text, file=file_to, end='')
         self.documents[url] = file_name

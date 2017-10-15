@@ -1,12 +1,13 @@
 import urllib.robotparser as urobot
 
+
 class Site:
-    def __init__(self, hostname):
+    def __init__(self, scheme, hostname):
         self.hostname = hostname
         self.iter = 0
-        self.urls = {0: self.hostname}
+        self.urls = {0: scheme + '://' + self.hostname}
         self._rp = urobot.RobotFileParser()
-        self._rp.set_url(hostname + '/robots.txt')
+        self._rp.set_url(scheme + '://' + hostname + '/robots.txt')
         self._rp.read()
 
     def update_urls(self, url):
