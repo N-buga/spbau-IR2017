@@ -1,7 +1,7 @@
 from collections import deque
 from urllib.parse import urlparse
 
-from Site import Site
+from crawler.Site import Site
 
 
 class UrlQueue:

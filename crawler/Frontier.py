@@ -1,4 +1,4 @@
-from UrlQueue import UrlQueue
+from crawler.UrlQueue import UrlQueue
 
 
 class Frontier:
