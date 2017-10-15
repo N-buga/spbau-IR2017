@@ -5,11 +5,21 @@ from bs4 import BeautifulSoup
 class Page:
     def __init__(self, url):
         self.url = url
+        self.headers = {
+            'User-Agent': 'loaferspider'
+        }
         self.soup = None
 
     def retrieve(self):
-        self._page = requests.get(self.url)
-        self.soup = BeautifulSoup(self._page, 'html.parser')
+        self._page = requests.get(self.url, headers=self.headers)
+        status_code = self._page.status_code
+        if 400 <= status_code < 600:
+            # to make sure that we do not fetch anything
+            # from a previous site as from this one
+            self.Soup = None
+            return False
+        self.soup = BeautifulSoup(self._page.text, 'html.parser')
+        return True
 
     def extract_urls(self):
         result = []
