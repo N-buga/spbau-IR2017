@@ -4,19 +4,23 @@ import time
 
 
 class Page:
-    def __init__(self, url):
+    def __init__(self, url, crawl_delay=None):
         self.url = url
         self.headers = {
             'User-Agent': 'loaferspider'
         }
         self.soup = None
+        self.crawl_delay = crawl_delay
 
     def retrieve(self):
         initial_time = time.time()
         self._page = requests.get(self.url, headers=self.headers)
-        response_delay = initial_time - time.time()
+        time_to_wait = initial_time - time.time()
+        if self.crawl_delay is not None and time_to_wait > self.crawl_delay:
+            time_to_wait = self.crawl_delay
         status_code = self._page.status_code
-        time.sleep(10 * response_delay)
+        time.sleep(10 * time_to_wait)
+
         if 400 <= status_code < 600:
             # to make sure that we do not fetch anything
             # from a previous site as from this one
