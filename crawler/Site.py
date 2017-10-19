@@ -1,5 +1,6 @@
 import socket
 import urllib.robotparser as urobot
+import re
 from urllib.error import URLError
 
 class Site:
@@ -20,11 +21,18 @@ class Site:
             status = True
         except URLError:
             status = False
+        except socket.timeout:
+            status = False
         finally:
             socket.setdefaulttimeout(default_timeout)
         return status
 
     def update_urls(self, url):
+        if url[-1] == '/':
+            url = url[:-1]
+        pattern = re.compile('\.(css|jpg|pdf|docx|js|png|ico)$')
+        if pattern.search(url):
+            return False
         if url not in self.urls.values():
             cnt = len(self.urls)
             self.urls[cnt] = url
