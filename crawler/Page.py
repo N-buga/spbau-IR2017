@@ -20,12 +20,15 @@ class Page:
 
     def retrieve(self):
         initial_time = time.time()
-        self._page = requests.get(self.url, headers=self.headers)
-        time_to_wait = initial_time - time.time()
+        try:
+            self._page = requests.get(self.url, headers=self.headers)
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError, requests.exceptions.InvalidSchema):
+            return False
+        time_to_wait = time.time() - initial_time
         if self.crawl_delay is not None and time_to_wait > self.crawl_delay:
             time_to_wait = self.crawl_delay
         status_code = self._page.status_code
-        time.sleep(10 * time_to_wait)
+        time.sleep(1) # TODO: !!!!!!!!!!!!
 
         if 400 <= status_code < 600:
             # to make sure that we do not fetch anything
