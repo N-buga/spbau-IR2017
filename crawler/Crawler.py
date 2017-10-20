@@ -43,20 +43,22 @@ class Crawler:
                 urls = page.extract_urls(current_url)
                 for url in urls:
                     self.frontier.add_url(url)
-            if self.steps_count % 10 == 0:
+            if self.steps_count % 100 == 0:
                 self.create_checkpoint(self.steps_count)
             self.frontier.releaseSite(website)
 
     def store_document(self, url, text):
-        hash = hashlib.md5(url.encode('utf-8'))
-        path = os.path.join(self.dir_to_save, self.create_file_name(hash))
+        hash = hashlib.md5()
+        hash.update(url.encode('utf-8'))
+        hash_value = hash.hexdigest()
+        path = os.path.join(self.dir_to_save, self.create_file_name(hash_value))
         if os.path.exists(path):
             return True
         with open(path, 'w') as file_to:
             print(text, file=file_to, end='')
         self.documents[url] = path
         with open(self.file_description, 'a') as descr:
-            print('{}\t{}'.format(url, str(hash)), file=descr)
+            print('{}\t{}'.format(url, hash_value), file=descr)
         return True
 
     def create_checkpoint(self, count_passed):
