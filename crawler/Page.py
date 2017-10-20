@@ -22,7 +22,7 @@ class Page:
         initial_time = time.time()
         try:
             self._page = requests.get(self.url, headers=self.headers)
-        except requests.exceptions.MissingSchema:
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError, requests.exceptions.InvalidSchema):
             return False
         time_to_wait = time.time() - initial_time
         if self.crawl_delay is not None and time_to_wait > self.crawl_delay:

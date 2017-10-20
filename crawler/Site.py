@@ -3,6 +3,7 @@ import urllib.robotparser as urobot
 import re
 from urllib.error import URLError
 
+
 class Site:
     _RESPONSE_TIMEOUT = 1
 
@@ -19,7 +20,7 @@ class Site:
         try:
             self._rp.read()
             status = True
-        except URLError:
+        except (URLError, ValueError):
             status = False
         except socket.timeout:
             status = False

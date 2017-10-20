@@ -64,4 +64,4 @@ class Crawler:
             pickle.dump(self, file)
 
         copyfile(self.file_description, os.path.join(self.dir_checkpoints, self.file_description))
-        print('Saved, step passed: {}'.format(self.steps_count))
+        print('Saved, step passed: {}, urls in queue: {}'.format(self.steps_count, self.frontier.cnt_added))

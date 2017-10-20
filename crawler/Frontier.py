@@ -19,7 +19,8 @@ class Frontier:
             self.cnt_added += 1
             self.queue.add_url(url)
         else:
-           self.queue.add_url_if_site_exists(url)
+           if self.queue.add_url_if_site_exists(url):
+               self.cnt_added += 1
 
     def releaseSite(self, site):
         self.queue.release_site(site)
