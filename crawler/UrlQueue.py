@@ -13,9 +13,14 @@ class UrlQueue:
         parsed_url = parse.urlparse(url)
         hostname = parsed_url.hostname
         scheme = parsed_url.scheme
+        if scheme is None:
+            print(url)
         if hostname not in self.sites.keys():
-            site = Site(scheme, hostname)
-            self.sites[hostname] = site
+            if hostname and scheme:
+                site = Site(scheme, hostname)
+                self.sites[hostname] = site
+            else:
+                return False
         else:
             site = self.sites[hostname]
 
