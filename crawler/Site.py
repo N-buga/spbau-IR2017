@@ -17,9 +17,6 @@ class Site:
         self._rp = urobot.RobotFileParser()
         self._rp.set_url(scheme + '://' + hostname + '/robots.txt')
 
-#    def _setup_url(self, url):
-#        r = requests.get()
-
     def read_robots_txt(self):
         default_timeout = socket.getdefaulttimeout()
         socket.setdefaulttimeout(self._RESPONSE_TIMEOUT)
