@@ -33,7 +33,8 @@ class Crawler:
             current_url = website.next_url()
             try:
                 website_delay = website.get_crawl_delay(self.USERAGENT)
-            except AttributeError:
+            except AttributeError as e:
+                print("[CRAWLER -- run] AttributeError: ", e)
                 continue
             page = Page(current_url, self.USERAGENT, website_delay)
             if not page.retrieve():
