@@ -25,6 +25,7 @@ class Page:
         try:
             self._page = requests.get(self.url, headers=self.headers)
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError, requests.exceptions.InvalidSchema):
+            print("[PAGE -- retrieve] exception")
             return False
         time_to_wait = self.DEFAULT_WAIT_TIME
         if self.crawl_delay is not None \
