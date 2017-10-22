@@ -2,6 +2,8 @@ import os
 import pickle
 from shutil import copyfile
 
+import _pickle
+
 from crawler.Page import Page
 import hashlib
 
@@ -62,8 +64,13 @@ class Crawler:
         return True
 
     def create_checkpoint(self, count_passed):
+        try:
+            byte_present = pickle.dumps(self)
+        except _pickle.PicklingError:
+            print("Error getting pickling!")
+            return
         with open(os.path.join(self.dir_checkpoints, self.checkpoints_name), 'wb') as file:
-            pickle.dump(self, file)
+            file.write(byte_present)
 
         copyfile(self.file_description, os.path.join(self.dir_checkpoints, self.file_description))
         print('Saved, step passed: {}, urls in queue: {}'.format(self.steps_count, self.frontier.cnt_added))
