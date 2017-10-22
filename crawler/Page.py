@@ -10,6 +10,8 @@ def is_absolute(url):
 
 
 class Page:
+    DEFAULT_WAIT_TIME = 1  # 1 second
+
     def __init__(self, url, useragent, crawl_delay=None):
         self.url = url
         self.headers = {
@@ -17,23 +19,24 @@ class Page:
         }
         self.soup = None
         self.crawl_delay = crawl_delay
+        self._page = None
 
     def retrieve(self):
-        initial_time = time.time()
         try:
             self._page = requests.get(self.url, headers=self.headers)
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError, requests.exceptions.InvalidSchema):
             return False
-        time_to_wait = time.time() - initial_time
-        if self.crawl_delay is not None and time_to_wait > self.crawl_delay:
+        time_to_wait = self.DEFAULT_WAIT_TIME
+        if self.crawl_delay is not None \
+                and self.DEFAULT_WAIT_TIME > self.crawl_delay:
             time_to_wait = self.crawl_delay
         status_code = self._page.status_code
-        time.sleep(1) # TODO: !!!!!!!!!!!!
+        time.sleep(time_to_wait)
 
         if 400 <= status_code < 600:
             # to make sure that we do not fetch anything
             # from a previous site as from this one
-            self.Soup = None
+            self.soup = None
             return False
         self.soup = BeautifulSoup(self._page.text, 'html.parser')
         return True
