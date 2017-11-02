@@ -3,6 +3,8 @@ Two-pass index
 """
 from copy import copy
 
+from storage.text_handling import TextUtils
+
 
 class WordDocInfo:
     def __init__(self, id, count, positions):
@@ -27,7 +29,11 @@ class WordDocInfo:
 
 
 class InvertedIndex:
-    def __init__(self, docs, file_name='inverted_index.txt'):
+    def __init__(self):
+        self.file_name = None
+        self.words_begin = None
+
+    def create_index(self, docs, file_name='inverted_index.txt'):
         self.file_name = file_name
         words_size = {}
         words_doc_count = {}
@@ -96,7 +102,7 @@ class Document:
     def get_text(self):
         with open(self.file_name, 'rb') as file_from:
             text = file_from.read()
-            return text.split()
+            return TextUtils.handle(text, main_locale='russian', locales=['russian', 'english'])
 
 
 class TestDoc:
