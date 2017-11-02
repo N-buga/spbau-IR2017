@@ -1,6 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 import time
+from nltk.stem import SnowballStemmer
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+import string
 
 from urllib.parse import urlparse, urljoin
 
@@ -70,4 +74,32 @@ class Page:
         return True
 
     def get_text(self):
-        return self._page.text # .get_text()
+        if self.soup is None:
+            return ""
+        strings = []
+        for div in self.soup.find_all(['div', 'body']):
+            strings.extend([string for string in div.stripped_strings if string != "" and string[0] != '<'])
+        return " ".join(strings)
+
+    @staticmethod
+    def text_to_words(text):
+        return word_tokenize(text.translate(str.maketrans("", "", "()!@#$%^&*_+=?<>~`',…©»")))
+
+    @staticmethod
+    def filter_stop_words(words, locale):
+        return [word for word in words if word not in stopwords.words(locale)]
+
+    @staticmethod
+    def only_words(words):
+        return [word for word in words
+                if word != "" and
+                word[0] not in string.digits and
+                word[0] not in string.punctuation]
+
+    def extract_places(self, text):
+        pass  # TODO using NLTK
+
+    @staticmethod
+    def stem(words, locale):
+        stemmer = SnowballStemmer(locale)
+        return [stemmer.stem(word) for word in words]
