@@ -36,8 +36,7 @@ class Page:
         time.sleep(time_to_wait)
 
         if 400 <= status_code < 600:
-            # to make sure that we do not fetch anything
-            # from a previous site as from this one
+            # invalidate handler value due to an error
             self.soup = None
             return False
         self.soup = BeautifulSoup(self._page.text, 'html.parser')

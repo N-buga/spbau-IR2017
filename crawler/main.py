@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     if not os.listdir(dir_checkpoints):
         print('No checkpoints were found.')
-        frontier = Frontier(['https://afisha.yandex.ru/', 'https://kudago.com'], pages_bound)
+        frontier = Frontier(['https://afisha.yandex.ru/'], pages_bound)
         crawler = Crawler(frontier, dir_for_docs, dir_checkpoints, checkpoints_name)
         if os.path.exists(os.path.join(dir_checkpoints, crawler.file_description)):
             copyfile(os.path.join(dir_checkpoints, crawler.file_description), crawler.file_description)

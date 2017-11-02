@@ -1,8 +1,10 @@
 import socket
 import urllib.robotparser as urobot
 import re
-# import requests
+import requests
 from urllib.error import URLError
+import email.utils as eutils
+import datetime
 
 
 class Site:
@@ -11,11 +13,17 @@ class Site:
     def __init__(self, scheme, hostname):
         self.hostname = hostname
         self.iter = 0
-        initial_url = scheme + '://' + self.hostname
-#       self.urls = {0: self._setup_url(initial_url)}
-        self.urls = {0: initial_url}
+        self.urls = {0: scheme + '://' + self.hostname}
+        self.timestamps = {0: None}
         self._rp = urobot.RobotFileParser()
         self._rp.set_url(scheme + '://' + hostname + '/robots.txt')
+
+    @staticmethod
+    def get_last_modified(url):
+        r = requests.get(url)
+        if 400 <= r.status_code < 600 or 'Last-Modified' not in r.headers:
+            return None
+        return datetime.datetime(*eutils.parsedate(r.headers['Last-Modified'])[:6])
 
     def read_robots_txt(self):
         default_timeout = socket.getdefaulttimeout()
@@ -42,13 +50,32 @@ class Site:
         if url not in self.urls.values():
             cnt = len(self.urls)
             self.urls[cnt] = url
+            self.timestamps[cnt] = None
             return True
         return False
 
+    # returns the first url which needs update (if any) or just hasn't been inspected yet
     def next_url(self):
-        # updating
+        # setup
+        init_iter = self.iter
         self.iter = (self.iter + 1) % len(self.urls)
-        return self.urls[self.iter]
+        url = self.urls[self.iter]
+        timestamp = self.timestamps[self.iter]
+        last_modified = self.get_last_modified(url)
+
+        # while we...
+        #   * haven't made the whole cycle
+        #   * and are sure that the page is up to date
+        #     (i.e. our timestamp for it is not None and is later or equal than its last-modified header)
+        # -- iterate
+        while self.iter != init_iter \
+            and timestamp is not None and last_modified is not None \
+            and timestamp >= last_modified:
+            self.iter = (self.iter + 1) % len(self.urls)
+            url = self.urls[self.iter]
+            timestamp = self.timestamps[self.iter]
+            last_modified = self.get_last_modified(url)
+        return url
 
     def permit_crawl(self, url):
         return self._rp.can_fetch('bot', url)
