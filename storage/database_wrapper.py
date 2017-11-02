@@ -5,27 +5,28 @@ import psycopg2
 config_file_name = 'config.json'
 
 
-class PostgresSQLWrapper:
-    command_check_table_exists = 'SELECT * FROM information_schema.tables WHERE table_name=%s'
-    commad_create_table = \
+class DatabaseWrapper:
+    command_check_table_exists = "SELECT to_regclass(%s);"
+    command_create_table = \
         """
         CREATE TABLE page_statistics (
-                url_id INTEGER NOT NULL,
+                url_id INTEGER PRIMARY KEY,
                 url text NOT NULL,
                 cnt_words INTEGER NOT NULL,
                 cnt_unique_words INTEGER NOT NULL,
-                cnt_links INTEGER NOT NULL,
-                PRIMARY KEY url_id
+                cnt_links INTEGER NOT NULL
         )
         """
 
     def __init__(self):
-        config_info = json.load(config_file_name)
+        with open(config_file_name, 'r') as config_file:
+            config_info = json.load(config_file)
         self.user_name = config_info['user']
         self.password = config_info['password']
         try:
-            self.conn = psycopg2.connect("dbname='metadata' user='{}' password='{}'".
-                                    format(self.user_name, self.password))
+            self.conn = psycopg2.connect('dbname=metadata user={} password={}'.
+                                         format(self.user_name, self.password))
+            self.conn.autocommit = True
         except:
             print('I am unable to connect to the database.')
             print("Index won't be creating")
@@ -33,14 +34,14 @@ class PostgresSQLWrapper:
 
         cur = self.conn.cursor()
         try:
-            cur.execute(self.command_check_table_exists, 'page_statistics')
+            res = cur.execute(self.command_check_table_exists, ('page_statistics',))
         except:
             print("Couldn't check existence of table")
             print("Index won't be creating")
             return
-        if cur.rowcount == 0:
+        if res is None:
             try:
-                cur.execute(self.commad_create_table)
+                cur.execute(self.command_create_table)
             except:
                 print('Could not create a table.')
                 return
@@ -63,8 +64,9 @@ class PostgresSQLWrapper:
         cur = self.conn.cursor()
         try:
             cur.execute("SELECT url_id FROM page_statistics WHERE url_id = %s", (url_id,))
-        except:
+        except Exception as err:
             print("Can't check if row exists.")
+            print(err)
             return None
         return cur.fetchone() is not None
 
