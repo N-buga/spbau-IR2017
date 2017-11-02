@@ -24,7 +24,8 @@ class Page:
     def retrieve(self):
         try:
             self._page = requests.get(self.url, headers=self.headers)
-        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError, requests.exceptions.InvalidSchema):
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError,
+                requests.exceptions.InvalidSchema, requests.exceptions.ChunkedEncodingError):
             print("[PAGE -- retrieve] exception")
             return False
         time_to_wait = self.DEFAULT_WAIT_TIME
@@ -70,4 +71,4 @@ class Page:
         return True
 
     def get_text(self):
-        return self._page.text
+        return self._page.text # .get_text()
