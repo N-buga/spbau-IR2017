@@ -28,8 +28,8 @@ class Page:
     def retrieve(self):
         try:
             self._page = requests.get(self.url, headers=self.headers)
-        except (
-        requests.exceptions.MissingSchema, requests.exceptions.ConnectionError, requests.exceptions.InvalidSchema):
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError,
+                requests.exceptions.InvalidSchema, requests.exceptions.ChunkedEncodingError):
             print("[PAGE -- retrieve] exception")
             return False
         time_to_wait = self.DEFAULT_WAIT_TIME
@@ -40,8 +40,7 @@ class Page:
         time.sleep(time_to_wait)
 
         if 400 <= status_code < 600:
-            # to make sure that we do not fetch anything
-            # from a previous site as from this one
+            # invalidate handler value due to an error
             self.soup = None
             return False
         self.soup = BeautifulSoup(self._page.text, 'html.parser')
