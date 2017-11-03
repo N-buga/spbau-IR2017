@@ -7,6 +7,7 @@ from nltk.corpus import stopwords
 import string
 import re
 import datetime
+import dateutil.parser as dparser
 
 from urllib.parse import urlparse, urljoin
 
@@ -79,8 +80,8 @@ class Page:
         if self.soup is None:
             return ""
         strings = []
-        for div in self.soup.find_all(['div', 'body']):
-            strings.extend([string for string in div.stripped_strings if string != "" and string[0] != '<'])
+        for div in self.soup.find_all(['div', 'span', 'body']):
+            strings.extend([string for string in div.stripped_strings if string != "" and re.search(r'[<>{}=\[\]\|]', string) is None])
         return " ".join(strings)
 
     @staticmethod
@@ -128,13 +129,36 @@ class DBEntry:
 class URLBaseRetriever:
     def __init__(self, url, type=None, time=None, date=None, price=None, city=None, venue=None, name=None):
         self.url = url
-        self.type = type
+
+        src = requests.get(url)
+        soup = bs(src.text, 'html.parser')
+        strings = []
+        for div in soup.find_all(['div', 'span', 'body']):
+            strings.extend([string for string in div.stripped_strings if string != "" and re.search(r'[<>{}=\[\]\|]', string) is None])
+
         self.time = time
         self.date = date
+        if self.time is None or self.date is None:
+            for s in strings:
+                try:
+                    d = dparser.parse(s, fuzzy=True)
+                    if self.time is None:
+                        self.time = str(d.time())
+                    if self.date is None:
+                        self.date = str(d.date())
+                    break
+                except:
+                    continue
+
+        self.type = type
         self.price = price
         self.city = city
         self.venue = venue
+
         self.name = name
+        if self.name is None:
+            pieces = url.split('/')
+            self.name = pieces[len(pieces) - 1].split('?', 1)[0]
 
     def get_type(self):
         return self.type
