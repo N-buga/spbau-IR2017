@@ -63,7 +63,7 @@ class Crawler:
             if self.steps_count % 100 == 0:
                 self.create_checkpoint(self.steps_count)
             self.frontier.releaseSite(website)
-            if self.steps_count % 10000 == 0:
+            if self.steps_count % 100 == 0:
                 self.create_index()
 
     def store_document(self, url, text):
@@ -71,7 +71,7 @@ class Crawler:
         hash.update(url.encode('utf-8'))
         hash_value = hash.hexdigest()
         path = os.path.join(self.dir_to_save, self.create_file_name(hash_value))
-        with open(path, 'w') as file_to:
+        with open(path, 'w', encoding='utf-8') as file_to:
             print(text, file=file_to, end='')
         self.documents[url] = path
         return True
@@ -85,17 +85,20 @@ class Crawler:
         with open(os.path.join(self.dir_checkpoints, self.checkpoints_name), 'wb') as file:
             file.write(byte_present)
 
-        with open(self.file_description, 'w') as descr:
+        with open(self.file_description, 'w', encoding='utf-8') as descr:
             for url in self.documents:
                 print('{}\t{}'.format(url, self.documents[url]), file=descr)
         copyfile(self.file_description, os.path.join(self.dir_checkpoints, self.file_description))
         print('Saved, step passed: {}, urls in queue: {}'.format(self.steps_count, self.frontier.cnt_added))
 
     def create_index(self):
-        docs = []
+        docs = {}
         for url in self.documents:
+            hash = hashlib.md5()
+            hash.update(url.encode('utf-8'))
+            hash_value = hash.hexdigest()
             path = self.documents[url]
             if os.path.exists(path):
-                docs.append(Document(path))
+                docs[hash_value] = Document(path)
         self.index = InvertedIndex()
         self.index.create_index(docs, self.inv_index_file_name)

@@ -7,7 +7,7 @@ import string
 class TextUtils: # TODO: cool name
     @staticmethod
     def text_to_words(text):
-        return word_tokenize(text.translate(str.maketrans("", "", "()!@#$%^&*_+=?<>~`',…©»")))
+        return word_tokenize(text.decode('utf-8').translate(str.maketrans("", "", "()!@#$%^&*_+=?<>~`',…©»")))
 
     @staticmethod
     def filter_stop_words(words, locales):

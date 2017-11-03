@@ -37,7 +37,7 @@ class InvertedIndex:
         self.file_name = file_name
         words_size = {}
         words_doc_count = {}
-        for doc_id in docs:
+        for num, doc_id in enumerate(docs):
             cur_words = {}
             text = docs[doc_id].get_text()
             for pos, word in enumerate(text):
@@ -52,6 +52,10 @@ class InvertedIndex:
                     words_doc_count[word] = 0
                 words_size[word] += len(cur_words[word].serialize().encode('utf-8'))
                 words_doc_count[word] += 1
+            if num % 10 == 0:
+                print('indexing: passed {} from {}'.format(num, len(docs)))
+            if num == 100:
+                break
         self.words_begin = {}
         cur_pos = 0
         for word in words_size:
