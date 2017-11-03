@@ -63,7 +63,7 @@ class Crawler:
             if self.steps_count % 100 == 0:
                 self.create_checkpoint(self.steps_count)
             self.frontier.releaseSite(website)
-            if self.steps_count % 100 == 0:
+            if self.steps_count % 10000 == 0:
                 self.create_index()
 
     def store_document(self, url, text):

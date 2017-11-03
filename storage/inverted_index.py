@@ -85,6 +85,7 @@ class InvertedIndex:
                 serialised_info = cur_words[word].serialize()
                 file.write(serialised_info.encode('utf-8'))
                 cur_words_begin[word] += len(serialised_info.encode('utf-8'))
+                file.close()
 
     def get_index(self, word):
         if word not in self.words_begin:
