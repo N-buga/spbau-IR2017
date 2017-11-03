@@ -19,10 +19,11 @@ if __name__ == "__main__":
 
     checkpoints_name = 'checkpoints.save'
     pages_bound = 100000
+    seeds = ['https://afisha.yandex.ru/', 'https://kudago.com']
 
     if not os.listdir(dir_checkpoints):
         print('No checkpoints were found.')
-        frontier = Frontier(['https://afisha.yandex.ru/'], pages_bound)
+        frontier = Frontier(seeds, pages_bound)
         crawler = Crawler(frontier, dir_for_docs, dir_checkpoints, checkpoints_name)
         if os.path.exists(os.path.join(dir_checkpoints, crawler.file_description)):
             copyfile(os.path.join(dir_checkpoints, crawler.file_description), crawler.file_description)
@@ -30,7 +31,22 @@ if __name__ == "__main__":
             open(crawler.file_description, 'w').close() # Wipe file
     else:
         with open(os.path.join(dir_checkpoints, checkpoints_name), 'rb') as check_file:
-            crawler = pickle.load(check_file)
-        print('Found checkpoints. Loaded crawler. Count urls in queue is {}'.format(crawler.frontier.cnt_added))
+            crawler_loaded = pickle.load(check_file)
+
+        frontier = Frontier(seeds, pages_bound)
+        crawler = Crawler(frontier, dir_for_docs, dir_checkpoints, checkpoints_name)
+
+        if (crawler_loaded.__dict__.keys() == crawler.__dict__.keys()) \
+                and (crawler_loaded.frontier.__dict__.keys() == crawler.frontier.__dict__.keys()):
+            crawler = crawler_loaded
+            print('Found checkpoints. Loaded crawler. Count urls in queue is {}'.format(crawler.frontier.cnt_added))
+        else:
+            print('Found checkpoints. Unable to load crawler. Load sources.')
+            if os.path.exists(os.path.join(dir_checkpoints, crawler.file_description)):
+                copyfile(os.path.join(dir_checkpoints, crawler.file_description), crawler.file_description)
+            else:
+                open(crawler.file_description, 'w').close() # Wipe file
+            crawler.restore()
+            print(crawler.steps_count)
 
     crawler.run()
