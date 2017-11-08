@@ -22,7 +22,7 @@ class WordDocInfo:
     @staticmethod
     def deserialize(file):
         word_doc_info = file.readline().decode('utf-8').split()
-        id = int(word_doc_info[0])
+        id = word_doc_info[0]
         count = int(word_doc_info[1])
         positions = list(map(int, word_doc_info[2:]))
         return WordDocInfo(id, count, positions)
@@ -46,16 +46,16 @@ class InvertedIndex:
                 else:
                     cur_words[word] = WordDocInfo(doc_id, 1, [pos])
             for word in cur_words:
-                if word not in words_size:
-                    words_size[word] = len('{}\n'.format(word).encode('utf-8'))
                 if word not in words_doc_count:
                     words_doc_count[word] = 0
+                if word not in words_size:
+                    words_size[word] = 0
                 words_size[word] += len(cur_words[word].serialize().encode('utf-8'))
                 words_doc_count[word] += 1
-            if num % 10 == 0:
+            if num % 100 == 0:
                 print('indexing: passed {} from {}'.format(num, len(docs)))
-            if num == 100:
-                break
+        for word in words_size:
+            words_size[word] += len('{} {}\n'.format(word, words_doc_count[word]).encode('utf-8'))
         self.words_begin = {}
         cur_pos = 0
         for word in words_size:
@@ -92,6 +92,7 @@ class InvertedIndex:
             return None
         else:
             file = open(self.file_name, 'rb')
+            file.seek(self.words_begin[word])
             cnt_docs = int(file.readline().decode('utf-8').split()[1])
             info = []
             for _ in range(cnt_docs):
@@ -116,12 +117,3 @@ class TestDoc:
 
     def get_text(self):
         return self.text.split()
-
-# if __name__ == "__main__":
-#     docs = {0: TestDoc('mama Ama mama mama bu'), 1: TestDoc('Ama тут тут bu'), 2: TestDoc('тут mama щз'),
-#             3: TestDoc('nen тут тут nen'), 4: TestDoc('mama')}
-#
-#     ii = InvertedIndex(docs)
-#     index = ii.get_index('mama')
-#     for doc_info in index:
-#         print(doc_info.id, doc_info.count, doc_info.positions)

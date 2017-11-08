@@ -27,7 +27,6 @@ class TextUtils: # TODO: cool name
     def extract_places(text):
         pass  # TODO using NLTK
 
-
     @staticmethod
     def stem(words, locale):
         stemmer = SnowballStemmer(locale)
