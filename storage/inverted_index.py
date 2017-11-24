@@ -1,9 +1,8 @@
 """
 Two-pass index
 """
-from copy import copy
-
 from storage.text_handling import TextUtils
+from pyspark.sql import SparkSession
 
 
 class WordDocInfo:
@@ -32,60 +31,82 @@ class InvertedIndex:
     def __init__(self):
         self.file_name = None
         self.words_begin = None
+        self.partitions = 4
 
     def create_index(self, docs, file_name='inverted_index.txt'):
         self.file_name = file_name
-        words_size = {}
-        words_doc_count = {}
-        for num, doc_id in enumerate(docs):
-            cur_words = {}
-            text = docs[doc_id].get_text()
-            for pos, word in enumerate(text):
-                if word in cur_words:
-                    cur_words[word].add_position(pos)
-                else:
-                    cur_words[word] = WordDocInfo(doc_id, 1, [pos])
-            for word in cur_words:
-                if word not in words_doc_count:
-                    words_doc_count[word] = 0
-                if word not in words_size:
-                    words_size[word] = 0
-                words_size[word] += len(cur_words[word].serialize().encode('utf-8'))
-                words_doc_count[word] += 1
-            if num % 100 == 0:
-                print('indexing: passed {} from {}'.format(num, len(docs)))
-        for word in words_size:
-            words_size[word] += len('{} {}\n'.format(word, words_doc_count[word]).encode('utf-8'))
+
+        spark = SparkSession \
+            .builder \
+            .appName("InvertedIndex") \
+            .getOrCreate()
+
+        res = spark.sparkContext.parallelize(docs, self.partitions).flatMap(
+            lambda doc_id: self.dict_for_doc(docs, doc_id)
+        ).aggregateByKey((0, 0), self.add_doc_info, self.merge_values) \
+            .map(lambda pairs_word_info: (pairs_word_info[0],
+                                          (pairs_word_info[1][0] + len(
+                                              '{} {}\n'.format(pairs_word_info[0], pairs_word_info[1][1]).encode(
+                                                  'utf-8')),
+                                           pairs_word_info[1][1])
+                                          )
+                 ).collect()
+
+        word_info = dict(res)
+
         self.words_begin = {}
         cur_pos = 0
-        for word in words_size:
+        for word in word_info:
             self.words_begin[word] = cur_pos
-            cur_pos += words_size[word]
+            cur_pos += word_info[word][0]
 
-        cur_words_begin = copy(self.words_begin)
         open(self.file_name, 'w').close() # Create if didn't exist & wipe
-        for word in cur_words_begin:
-            file = open(self.file_name, 'r+b')
-            file.seek(cur_words_begin[word])
-            file.write('{} {}\n'.format(word, words_doc_count[word]).encode('utf-8'))
-            file.close()
-            cur_words_begin[word] += len('{} {}\n'.format(word, words_doc_count[word]).encode('utf-8'))
 
-        for doc_id in docs:
-            cur_words = {}
-            text = docs[doc_id].get_text()
-            for pos, word in enumerate(text):
-                if word in cur_words:
-                    cur_words[word].add_position(pos)
-                else:
-                    cur_words[word] = WordDocInfo(doc_id, 1, [pos])
-            for word in cur_words:
-                file = open(self.file_name, 'r+b')
-                file.seek(cur_words_begin[word])
-                serialised_info = cur_words[word].serialize()
-                file.write(serialised_info.encode('utf-8'))
-                cur_words_begin[word] += len(serialised_info.encode('utf-8'))
-                file.close()
+        spark.sparkContext.parallelize(docs, self.partitions).flatMap(
+            lambda doc_id: self.dict_for_doc(docs, doc_id)
+        ).aggregateByKey(b'', self.add_string_doc_info, self.merge_text)\
+            .map(lambda pair: (pair[0], '{} {}\n'.format(pair[0], word_info[pair[0]][1]).encode('utf-8') + pair[1]))\
+            .foreach(lambda pair: self.write_to_file(pair))
+
+    def write_to_file(self, pair):
+        word, text = pair
+        file = open(self.file_name, 'r+b')
+        file.seek(self.words_begin[word])
+        file.write(text)
+        file.close()
+
+    @staticmethod
+    def dict_for_doc(docs, doc_id):
+        cur_words = {}
+        text = docs[doc_id].get_text()
+        for pos, word in enumerate(text):
+            if word in cur_words:
+                cur_words[word].add_position(pos)
+            else:
+                cur_words[word] = WordDocInfo(doc_id, 1, [pos])
+        return cur_words.items()
+
+    @staticmethod
+    def add_doc_info(pair, doc_info):
+        size, doc_count = pair
+        size += len(doc_info.serialize().encode('utf-8'))
+        doc_count += 1
+        return size, doc_count
+
+    @staticmethod
+    def add_string_doc_info(text, doc_info):
+        serialised_info = doc_info.serialize().encode('utf-8')
+        return text + serialised_info
+
+    @staticmethod
+    def merge_values(pair1, pair2):
+        size = pair1[0] + pair2[0]
+        doc_count = pair1[1] + pair2[1]
+        return (size, doc_count)
+
+    @staticmethod
+    def merge_text(text1, text2):
+        return text1 + text2
 
     def get_index(self, word):
         if word not in self.words_begin:

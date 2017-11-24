@@ -14,7 +14,7 @@ def is_absolute(url):
 
 
 class Page:
-    DEFAULT_WAIT_TIME = 1  # 1 second
+    DEFAULT_WAIT_TIME = 0.5  # 0.5 second
 
     def __init__(self, url, useragent, crawl_delay=None):
         self.url = url
@@ -33,8 +33,7 @@ class Page:
             print("[PAGE -- retrieve] exception")
             return False
         time_to_wait = self.DEFAULT_WAIT_TIME
-        if self.crawl_delay is not None \
-                and self.DEFAULT_WAIT_TIME > self.crawl_delay:
+        if self.crawl_delay is not None:
             time_to_wait = self.crawl_delay
         status_code = self._page.status_code
         time.sleep(time_to_wait)

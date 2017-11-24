@@ -21,10 +21,18 @@ class Site:
     @staticmethod
     def get_last_modified(url):
         try:
-            r = requests.get(url)
-        except ConnectionError as err:
+            r = requests.get(url, timeout=6)
+        except ConnectionError:
             print("[SITE -- read_robots_txt] ConnectionError")
             return None
+        except requests.exceptions.MissingSchema:
+            print("[SITE -- read_robots_txt] MissingSchemaError")
+            return None
+        except requests.exceptions.Timeout:
+            print("[SITE -- read_robots_txt] Timeout")
+            print(url)
+            return None
+
         if 400 <= r.status_code < 600 or 'Last-Modified' not in r.headers:
             return None
         return datetime.datetime(*eutils.parsedate(r.headers['Last-Modified'])[:6])
