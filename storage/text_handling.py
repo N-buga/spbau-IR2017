@@ -7,7 +7,7 @@ import string
 class TextUtils: # TODO: cool name
     @staticmethod
     def text_to_words(text):
-        return word_tokenize(text.decode('utf-8').translate(str.maketrans("", "", "()!@#$%^&*_+=?<>~`',…©»")))
+        return word_tokenize(text.translate(str.maketrans("", "", "()!@#$%^&*_+=?<>~`',…©»")))
 
     @staticmethod
     def filter_stop_words(words, locales):
@@ -24,16 +24,12 @@ class TextUtils: # TODO: cool name
                 word[0] not in string.punctuation]
 
     @staticmethod
-    def extract_places(text):
-        pass  # TODO using NLTK
-
-    @staticmethod
     def stem(words, locale):
         stemmer = SnowballStemmer(locale)
         return [stemmer.stem(word) for word in words]
 
     @staticmethod
-    def handle(text, main_locale, locales):
+    def handle(text, main_locale='russian', locales=['russian', 'english']):
         return TextUtils.stem(
             TextUtils.only_words(TextUtils.filter_stop_words(
                 TextUtils.text_to_words(text),

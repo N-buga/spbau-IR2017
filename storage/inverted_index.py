@@ -1,6 +1,9 @@
 """
 Two-pass index
 """
+import shutil
+import tempfile
+
 from storage.text_handling import TextUtils
 from pyspark.sql import SparkSession
 
@@ -28,14 +31,12 @@ class WordDocInfo:
 
 
 class InvertedIndex:
-    def __init__(self):
-        self.file_name = None
+    def __init__(self, file_name):
+        self.file_name = file_name
         self.words_begin = None
         self.partitions = 4
 
-    def create_index(self, docs, file_name='inverted_index.txt'):
-        self.file_name = file_name
-
+    def create_index(self, lock, docs):
         spark = SparkSession \
             .builder \
             .appName("InvertedIndex") \
@@ -60,17 +61,22 @@ class InvertedIndex:
             self.words_begin[word] = cur_pos
             cur_pos += word_info[word][0]
 
-        open(self.file_name, 'w').close() # Create if didn't exist & wipe
+        tmp_file = tempfile.NamedTemporaryFile()
+        tmp_file_name = tmp_file.name
 
         spark.sparkContext.parallelize(docs, self.partitions).flatMap(
             lambda doc_id: self.dict_for_doc(docs, doc_id)
         ).aggregateByKey(b'', self.add_string_doc_info, self.merge_text)\
             .map(lambda pair: (pair[0], '{} {}\n'.format(pair[0], word_info[pair[0]][1]).encode('utf-8') + pair[1]))\
-            .foreach(lambda pair: self.write_to_file(pair))
+            .foreach(lambda pair: self.write_to_file(pair, tmp_file_name))
 
-    def write_to_file(self, pair):
+        lock.acquire()
+        shutil.copyfile(tmp_file_name, self.file_name)
+        lock.release()
+
+    def write_to_file(self, pair, tmp_file_name):
         word, text = pair
-        file = open(self.file_name, 'r+b')
+        file = open(tmp_file_name, 'r+b')
         file.seek(self.words_begin[word])
         file.write(text)
         file.close()
@@ -79,7 +85,7 @@ class InvertedIndex:
     def dict_for_doc(docs, doc_id):
         cur_words = {}
         text = docs[doc_id].get_text()
-        for pos, word in enumerate(text):
+        for pos, word in enumerate(text.split()):
             if word in cur_words:
                 cur_words[word].add_position(pos)
             else:
@@ -110,7 +116,7 @@ class InvertedIndex:
 
     def get_index(self, word):
         if word not in self.words_begin:
-            return None
+            return []
         else:
             file = open(self.file_name, 'rb')
             file.seek(self.words_begin[word])
@@ -128,8 +134,8 @@ class Document:
 
     def get_text(self):
         with open(self.file_name, 'rb') as file_from:
-            text = file_from.read()
-            return TextUtils.handle(text, main_locale='russian', locales=['russian', 'english'])
+            text = file_from.read().decode('utf-8')
+            return text
 
 
 class TestDoc:
