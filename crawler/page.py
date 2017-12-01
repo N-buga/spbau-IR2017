@@ -6,6 +6,7 @@ import datetime
 import dateutil.parser as dparser
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
+from readability.readability import Document
 
 from crawler import crawler
 from storage.text_handling import TextUtils
@@ -46,7 +47,9 @@ class Page:
             # invalidate handler value due to an error
             self.soup = None
             return False
-        self.soup = BeautifulSoup(self._page.content, 'html.parser')
+        self.soup = BeautifulSoup(self._page.content, 'lxml')
+        for tag in self.soup.find_all(['aside', 'form', 'input', 'menu', 'menuitem', 'dialog']):
+            tag.replaceWith('')
         return True
 
     def extract_urls(self, current_url):
@@ -80,6 +83,7 @@ class Page:
         if self.soup is None:
             return ""
         strings = []
+
         for div in self.soup.find_all(['div', 'span', 'body']):
             strings.extend([string for string in div.stripped_strings if
                             string != "" and re.search(r'[<>{}=\[\]\|]', string) is None])
@@ -87,13 +91,28 @@ class Page:
         preprocessed_text = TextUtils.handle(text)
         return ' '.join(preprocessed_text)
 
+    def get_main_text(self):
+        doc = Document(self._page.content, positive_keywords=re.compile('event-description__text|event-heading__title|event-heading__argument', re.I))
+        title = doc.title()
+        summary = doc.summary(html_partial=True)
 
-def url_retriever_factory(url, bs):
+        self.summary_bs = BeautifulSoup(summary, 'html.parser')
+
+        strings = []
+        for div in self.summary_bs.find_all(['div', 'span', 'body']):
+            strings.extend([string for string in div.stripped_strings if
+                            string != "" and re.search(r'[<>{}=\[\]\|]', string) is None])
+        text = "\n".join(strings)
+        preprocessed_text = TextUtils.handle(text)
+        return '{}\n{}'.format(' '.join(TextUtils.handle(title)), ' '.join(preprocessed_text))
+
+
+def url_retriever_factory(url, text, bs):
     if re.match(r'.*afisha\.yandex\.ru/[a-z-]+/[a-z]+/.*', url):
-        return URLYandexRetriever(url, bs)
+        return URLYandexRetriever(url, text, bs)
     if re.match(r'.*mariinsky\.ru/../playbill/playbill/[0-9]+/[0-9]+/[0-9]+/[0-9]_[0-9]+', url):
-        return URLMarRetriever(url, bs)
-    return URLBaseRetriever(url, bs)
+        return URLMarRetriever(url, text, bs)
+    return URLBaseRetriever(url, text)
 
 
 class DBEntry:
@@ -108,17 +127,12 @@ class DBEntry:
 
 
 class URLBaseRetriever:
-    def __init__(self, url, soup, type=None, time=None, date=None, price=None, city=None, venue=None, name=None):
+    def __init__(self, url, text, type=None, time=None, date=None, price=None, city=None, venue=None, name=None):
         self.url = url
-
-        strings = []
-        for div in soup.find_all(['div', 'span', 'body']):
-            strings.extend([string for string in div.stripped_strings if string != "" and re.search(r'[<>{}=\[\]\|]', string) is None])
-
         self.time = time
         self.date = date
         if self.time is None or self.date is None:
-            for s in strings:
+            for s in text:
                 try:
                     d = dparser.parse(s, fuzzy=True)
                     if self.time is None:
@@ -165,8 +179,8 @@ class URLBaseRetriever:
 
 
 class URLYandexRetriever(URLBaseRetriever):
-    def __init__(self, url, soup):
-        super().__init__(url, soup)
+    def __init__(self, url, text, soup):
+        super().__init__(url, text)
 
         pieces = url.split('/')
         self.type = pieces[4]
@@ -197,8 +211,8 @@ class URLYandexRetriever(URLBaseRetriever):
 
 
 class URLMarRetriever(URLBaseRetriever):
-    def __init__(self, url, soup):
-        super().__init__(url, soup, type='concert')
+    def __init__(self, url, text, soup):
+        super().__init__(url, text, type='concert')
 
         pieces = url.split('/')
         self.date = datetime.date(int(pieces[6]), int(pieces[7]), int(pieces[8]))
