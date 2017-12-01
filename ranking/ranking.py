@@ -53,7 +53,7 @@ def process(query, lock, checkpoint_path, descr_file):
     tf = gather_info(query_info)  # td[doc][word]
     urls = get_id_url(descr_file)
     cnt_docs = len(urls)
-    idf = dict([(word, 1.0*cnt_docs/math.log(len(query_info[word]))) for word in query_info]) # idf[word]
+    idf = dict([(word, math.log(1.0*cnt_docs/len(query_info[word]))) for word in query_info]) # idf[word]
     docs = gather_info(query_info)
 
     score = {}  # BM25
@@ -65,10 +65,17 @@ def process(query, lock, checkpoint_path, descr_file):
 
     for doc in docs:
         score[doc] = 0
+        url = urls[doc]
+        if '&date=' in url or '&version=mobile' in url or '?source=menu' in url:
+            continue
         _, _, doc_dl, _, _ = paf.get_row(doc)
         dl_av = paf.get_average()  # TODO: Want faster
         for word in preprocessed_query:
-            score[doc] += 1.0*idf[word]*(k1 + 1)*tf[doc][word]/(k1*((1 - b) + 1.0*b*doc_dl/dl_av) + tf[doc][word])
+            if word in tf[doc]:
+                tf_doc_word = tf[doc][word]
+            else:
+                tf_doc_word = 0
+            score[doc] += 1.0*idf[word]*(k1 + 1)*tf_doc_word/(k1*((1 - b) + 1.0*b*doc_dl/dl_av) + tf_doc_word)
 
     if len(score) == 0:
         print("Can't find anything for query {}".format(query))

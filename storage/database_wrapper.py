@@ -113,7 +113,7 @@ class FileAttributeTableWrapper(TableWrapper):
             FROM {};
             """.format(self.TABLE_NAME)
         )
-        return cur.fetchall()
+        return float(cur.fetchone()[0])
 
 
 class EntityTableWrapper(TableWrapper):
