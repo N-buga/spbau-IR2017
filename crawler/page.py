@@ -7,6 +7,7 @@ import dateutil.parser as dparser
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from readability.readability import Document
+from geotext import GeoText
 
 from crawler import crawler
 from storage.text_handling import TextUtils
@@ -145,8 +146,20 @@ class URLBaseRetriever:
 
         self.type = type
         self.price = price
-        self.city = city
         self.venue = venue
+
+        self.city = city
+        if city is None:
+            cities = GeoText(text).cities
+            max_cnt = -1
+            max_city = None
+            words = TextUtils.text_to_words(text)
+            for city in cities:
+                cnt = words.count(city)
+                if cnt > max_cnt:
+                    max_cnt = cnt
+                    max_city = city
+            self.city = max_city
 
         self.name = name
         if self.name is None:
