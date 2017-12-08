@@ -1,3 +1,5 @@
+from copy import copy
+
 import requests
 import time
 import re
@@ -48,7 +50,8 @@ class Page:
             self.soup = None
             return False
         self.soup = BeautifulSoup(self._page.content, 'lxml')
-        for tag in self.soup.find_all(['aside', 'form', 'input', 'menu', 'menuitem', 'dialog']):
+        self.main_soup = BeautifulSoup(self._page.content, 'lxml')
+        for tag in self.main_soup.find_all(['aside', 'form', 'input', 'menu', 'menuitem', 'dialog', 'footer']):
             tag.replaceWith('')
         return True
 
@@ -84,7 +87,7 @@ class Page:
             return ""
         strings = []
 
-        for div in self.soup.find_all(['div', 'span', 'body']):
+        for div in self.main_soup.find_all(['div', 'span', 'body']):
             strings.extend([string for string in div.stripped_strings if
                             string != "" and re.search(r'[<>{}=\[\]\|]', string) is None])
         text = "\n".join(strings)

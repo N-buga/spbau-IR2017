@@ -36,11 +36,14 @@ def gather_info(query_info):
 
 def process(query, lock, checkpoint_path, descr_file):
     # TODO: check & debug
+
     lock.acquire()
-    with open(checkpoint_path, 'rb') as check_file:
-        crawler_loaded = pickle.load(check_file)
-        _, _, _, inv_index = crawler_loaded
-    lock.release()
+    try:
+        with open(checkpoint_path, 'rb') as check_file:
+            crawler_loaded = pickle.load(check_file)
+            _, _, _, inv_index = crawler_loaded
+    finally:
+        lock.release()
 
     preprocessed_query = TextUtils.handle(query)
     query_info = {}
@@ -53,7 +56,7 @@ def process(query, lock, checkpoint_path, descr_file):
     tf = gather_info(query_info)  # td[doc][word]
     urls = get_id_url(descr_file)
     cnt_docs = len(urls)
-    idf = dict([(word, math.log(1.0*cnt_docs/len(query_info[word]))) for word in query_info]) # idf[word]
+    idf = dict([(word, math.log(1.0*cnt_docs/len(query_info[word]))) for word in query_info if len(query_info[word]) != 0]) # idf[word]
     docs = gather_info(query_info)
 
     score = {}  # BM25
@@ -81,6 +84,13 @@ def process(query, lock, checkpoint_path, descr_file):
         print("Can't find anything for query {}".format(query))
 
     ranking_docs = sorted(score, key=score.get, reverse=True)
-    for i in range(min(10, len(ranking_docs))):
+
+    best_urls = []
+    for i in range(min(15, len(ranking_docs))):
         url = urls[ranking_docs[i]]
         print(url)
+        best_urls.append(url)
+
+    if len(best_urls) == 0:
+        return '2\n' + "Can't find result on this query."
+    return '1\n' + '\n'.join(best_urls)
