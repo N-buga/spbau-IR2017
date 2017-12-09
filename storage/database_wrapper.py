@@ -97,7 +97,7 @@ class FileAttributeTableWrapper(TableWrapper):
                 """
                 UPDATE {} SET url_id=%s, url=%s, cnt_words=%s, cnt_unique_words=%s, cnt_links=%s
                 WHERE url_id=%s
-                """.format(self.TABLE_NAME), (*new_row, new_row[0])
+                """.format(self.TABLE_NAME), (new_row[0], new_row[1], new_row[2], new_row[3], new_row[4], new_row[5], new_row[0])
             )
             return True
         except Exception as err:
@@ -173,7 +173,7 @@ class EntityTableWrapper(TableWrapper):
                 UPDATE {} SET url_id=%s, url=%s, event_type=%s, event_time=%s, event_date=%s,\
                 price=%s, city=%s, venue=%s, event_name=%s
                 WHERE url_id=%s
-                """.format(self.TABLE_NAME), (*new_row, new_row[0])
+                """.format(self.TABLE_NAME), (new_row[0], new_row[1], new_row[2], new_row[3], new_row[4], new_row[5], new_row[6], new_row[7], new_row[8], new_row[9], new_row[0])
             )
             return True
         except Exception as err:

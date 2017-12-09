@@ -74,7 +74,7 @@ class Crawler:
                     self.enities_wrapper.index(
                         self.url_id(current_url),
                         current_url,
-                        url_retriever_factory(current_url, page.soup).form_db_entry()
+                        url_retriever_factory(current_url, text, page.soup).form_db_entry()
                     )
                     self.fileattribute_wrapper.index(
                         self.url_id(current_url),

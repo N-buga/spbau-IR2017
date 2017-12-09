@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 from readability.readability import Document
 from geotext import GeoText
 
-from crawler import crawler
 from storage.text_handling import TextUtils
 
 
@@ -21,9 +20,10 @@ class Page:
     DEFAULT_WAIT_TIME = 0.5  # 0.5 second
 
     def __init__(self, url, crawl_delay=None):
+        from crawler.crawler import Crawler
         self.url = url
         self.headers = {
-            'User-Agent': crawler.Crawler.USERAGENT
+            'User-Agent': Crawler.USERAGENT
         }
         self.soup = None
         self.crawl_delay = crawl_delay
