@@ -10,7 +10,6 @@ from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from readability.readability import Document
 
-from crawler import crawler
 from storage.text_handling import TextUtils
 
 
@@ -22,6 +21,7 @@ class Page:
     DEFAULT_WAIT_TIME = 0.5  # 0.5 second
 
     def __init__(self, url, crawl_delay=None):
+        from crawler import crawler
         self.url = url
         self.headers = {
             'User-Agent': crawler.Crawler.USERAGENT
@@ -36,8 +36,8 @@ class Page:
             session.trust_env = False  # Don't read proxy settings from OS
             self._page = session.get(self.url, headers=self.headers)
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError,
-                requests.exceptions.InvalidSchema, requests.exceptions.ChunkedEncodingError):
-            print("[PAGE -- retrieve] exception")
+                requests.exceptions.InvalidSchema, requests.exceptions.ChunkedEncodingError) as err:
+            print("[PAGE -- retrieve] exception", err)
             return False
         time_to_wait = self.DEFAULT_WAIT_TIME
         if self.crawl_delay is not None:
