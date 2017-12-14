@@ -34,7 +34,7 @@ def gather_info(query_info):
     return docs
 
 
-def process(query, lock, checkpoint_path, descr_file):
+def process(query, city, lock, checkpoint_path, descr_file):
     # TODO: check & debug
 
     lock.acquire()

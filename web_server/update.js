@@ -5,6 +5,8 @@
 function sendQuery() {
     var input = document.getElementById("mySearch");
     var query = input.value;
+    var select_list = document.getElementById("city");
+    var city = select_list.options[select_list.selectedIndex].text;
     console.log(query);
     var place = document.getElementById("serp-list");
 
@@ -15,7 +17,7 @@ function sendQuery() {
         //  inProcessInterval = setInterval(function() {
         //     answerParagraph.textContent = answerParagraph.textContent + ".";
         // }, 1000);
-        connection.send(query);
+        connection.send(city + "\n" + query);
     };
 
     connection.onmessage = function (msg) {
