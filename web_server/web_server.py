@@ -16,11 +16,12 @@ class WebServer:
 
     @asyncio.coroutine
     def query_handler(self, websocket, path):
-        query = yield from websocket.recv()
+        city_query = yield from websocket.recv()
+        city, query = city_query.split('\n')
         print("query:", query)
 
         try:
-            answer = process(query, self.lock, self.path_to_checkpoints, self.descr_file)
+            answer = process(query, city, self.lock, self.path_to_checkpoints, self.descr_file)
         except Exception as err:
             get_log().error(err)
             answer = '0\n' + 'Internal error!'
