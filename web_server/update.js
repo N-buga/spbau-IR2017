@@ -24,7 +24,7 @@ function sendQuery() {
         // if (inProcessInterval != undefined) {
         //     clearInterval(inProcessInterval);
         // }
-        var results = msg.data.split("\n");
+        var results = msg.data.split("\n\n");
         var error_code = results[0];
         var new_url;
         if (error_code == "0") {
@@ -35,13 +35,22 @@ function sendQuery() {
             if (error_code == "1") {
                 elem.textContent = "";
                 for (var i = 1; i < results.length; ++i) {
-                    new_url = results[i];
+                    new_result = results[i].split("\t"); // it should give two-element array
+                    new_url = new_result[0];
+                    new_context = new_result[1];
+
                     var url = document.createElement("a");
                     url.setAttribute("href", new_url);
                     url.textContent = new_url;
+
+                    var context = document.createElement("div");
+                    context.textContent = new_context
+
                     var newElement = document.createElement("li");
                     newElement.setAttribute("class", "snippet");
                     newElement.appendChild(url);
+                    newElement.appendChild(context);
+
                     place.appendChild(newElement);
                 }
             } else {

@@ -5,6 +5,7 @@ import math
 
 from storage.database_wrapper import FileAttributeTableWrapper
 from storage.text_handling import TextUtils
+from crawler.page import Page
 
 
 def get_id_url(descr_file):
@@ -42,6 +43,8 @@ def process(query, city, lock, checkpoint_path, descr_file):
         with open(checkpoint_path, 'rb') as check_file:
             crawler_loaded = pickle.load(check_file)
             _, _, _, inv_index = crawler_loaded
+    except Exception as err:
+        print(err)
     finally:
         lock.release()
 
@@ -88,9 +91,24 @@ def process(query, city, lock, checkpoint_path, descr_file):
     best_urls = []
     for i in range(min(15, len(ranking_docs))):
         url = urls[ranking_docs[i]]
+        result = url + "\t"
+
+        # get snippet text
+        page = Page(url)
+        page.retrieve()
+        text = page.get_text()
+        for word in preprocessed_query:
+            context = TextUtils.search(word, text, 4)
+            for w in context:
+                if w != word:
+                    result += w
+                else:
+                    result += "<span style=\"color:blue;font-weight:bold\">" + w + "</span>"
+
         print(url)
-        best_urls.append(url)
+        print(result)
+        best_urls.append(result)
 
     if len(best_urls) == 0:
         return '2\n' + "Can't find result on this query."
-    return '1\n' + '\n'.join(best_urls)
+    return '1\n\n' + '\n'.join(best_urls)
