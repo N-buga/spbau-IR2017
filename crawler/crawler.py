@@ -74,7 +74,7 @@ class Crawler:
                     self.enities_wrapper.index(
                         self.url_id(current_url),
                         current_url,
-                        url_retriever_factory(current_url, page.soup).form_db_entry()
+                        url_retriever_factory(current_url, text, page.main_soup).form_db_entry()
                     )
                     self.fileattribute_wrapper.index(
                         self.url_id(current_url),
@@ -84,9 +84,9 @@ class Crawler:
                 urls = page.extract_urls(current_url)
                 for url in urls:
                     self.frontier.add_url(url)
-            if self.steps_count % 100 == 0:
+            if self.steps_count % 20000 == 0:
                 self.create_index()
-            if self.steps_count % 100 == 0:
+            if self.steps_count % 1000 == 0:
                 self.create_checkpoint()
 
     def store_document(self, url, text):
