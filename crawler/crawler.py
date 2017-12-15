@@ -84,9 +84,9 @@ class Crawler:
                 urls = page.extract_urls(current_url)
                 for url in urls:
                     self.frontier.add_url(url)
-            if self.steps_count % 20000 == 0:
+            if self.steps_count % 20 == 0: # 000 == 0:
                 self.create_index()
-            if self.steps_count % 1000 == 0:
+            if self.steps_count % 10 == 0:  # 00 == 0:
                 self.create_checkpoint()
 
     def store_document(self, url, text):

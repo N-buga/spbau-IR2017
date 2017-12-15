@@ -24,6 +24,7 @@ class WebServer:
             answer = process(query, city, self.lock, self.path_to_checkpoints, self.descr_file)
         except Exception as err:
             get_log().error(err)
+            print(err)
             answer = '0\n' + 'Internal error!'
         yield from websocket.send(answer)
         print("send:", answer)

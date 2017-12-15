@@ -37,14 +37,34 @@ function sendQuery() {
                 for (var i = 1; i < results.length; ++i) {
                     new_result = results[i].split("\t"); // it should give two-element array
                     new_url = new_result[0];
-                    new_context = new_result[1];
+                    new_context = new_result[1].split("\n");
 
                     var url = document.createElement("a");
                     url.setAttribute("href", new_url);
                     url.textContent = new_url;
 
                     var context = document.createElement("div");
-                    context.textContent = new_context
+                    for(var j = 0; j < new_context.length; j++) {
+                        pieces0 = new_context[j].split("<span style=\"color:blue;font-weight:bold\">");
+                        pieces1 = pieces0[1].split("</span>");
+
+                        p1 = pieces0[0];
+                        p2 = pieces1[0];
+                        p3 = pieces1[1];
+
+                        el1 = document.createElement("span");
+                        el2 = document.createElement("span");
+                        el2.setAttribute("style", "color:blue;font-weight:bold");
+                        el3 = document.createElement("span");
+                        el1.textContent = p1;
+                        el2.textContent = p2 + " ";
+                        el3.textContent = p3 + "\n";
+
+                        context.appendChild(el1);
+                        context.appendChild(el2);
+                        context.appendChild(el3);
+                        context.appendChild(document.createElement("br"));
+                    }
 
                     var newElement = document.createElement("li");
                     newElement.setAttribute("class", "snippet");

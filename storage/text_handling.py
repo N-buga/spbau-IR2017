@@ -47,8 +47,8 @@ class TextUtils: # TODO: cool name
         matches = (i for (i,w) in enumerate(words) if w.lower() == target)
         for index in matches:
             if index < context //2:
-                yield words[0:context+1]
+                return words[0:context+1]
             elif index > len(words) - context//2 - 1:
-                yield words[-(context+1):]
+                return words[-(context+1):]
             else:
-                yield words[index - context//2:index + context//2 + 1]
+                return words[index - context//2:index + context//2 + 1]

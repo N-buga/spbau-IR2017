@@ -99,16 +99,19 @@ def process(query, city, lock, checkpoint_path, descr_file):
         text = page.get_text()
         for word in preprocessed_query:
             context = TextUtils.search(word, text, 4)
+            if context is None:
+                continue
             for w in context:
                 if w != word:
-                    result += w
+                    result += w + " "
                 else:
                     result += "<span style=\"color:blue;font-weight:bold\">" + w + "</span>"
+            result += "\n"
 
         print(url)
         print(result)
         best_urls.append(result)
 
     if len(best_urls) == 0:
-        return '2\n' + "Can't find result on this query."
+        return '2\n\n' + "Can't find result on this query."
     return '1\n\n' + '\n'.join(best_urls)
