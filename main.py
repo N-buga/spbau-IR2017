@@ -6,6 +6,7 @@ import multiprocessing as mp
 
 from crawler.frontier import Frontier
 from storage.inverted_index import InvertedIndex
+from web_server.web_server import WebServer
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -27,7 +28,7 @@ if __name__ == "__main__":
     descr_file = 'descr.txt'
 
     seeds = ['https://afisha.yandex.ru/', 'https://kudago.com']
-    pages_bound = 100000
+    pages_bound = 300  # 100000
     lock = ctx.Lock()
 
     if checkpoints_name not in os.listdir(dir_checkpoints):
@@ -59,9 +60,11 @@ if __name__ == "__main__":
 
     proc.start()
     try:
-        in_ = input()
-        while in_ != 'exit':
-            process(in_, lock, os.path.join(dir_checkpoints, checkpoints_name), descr_file)
-            in_ = input()
+        server = WebServer(lock, os.path.join(dir_checkpoints, checkpoints_name), descr_file)
+        server.run_server()
+        # in_ = input()
+        # while in_ != 'exit':
+        #     process(in_, lock, os.path.join(dir_checkpoints, checkpoints_name), descr_file)
+        #     in_ = input()
     finally:
         proc.terminate()

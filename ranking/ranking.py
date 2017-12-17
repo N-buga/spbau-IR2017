@@ -5,6 +5,8 @@ import math
 
 from storage.database_wrapper import FileAttributeTableWrapper
 from storage.text_handling import TextUtils
+from crawler.page import Page
+import config
 
 
 def get_id_url(descr_file):
@@ -34,13 +36,18 @@ def gather_info(query_info):
     return docs
 
 
-def process(query, lock, checkpoint_path, descr_file):
+def process(query, city, lock, checkpoint_path, descr_file):
     # TODO: check & debug
+
     lock.acquire()
-    with open(checkpoint_path, 'rb') as check_file:
-        crawler_loaded = pickle.load(check_file)
-        _, _, _, inv_index = crawler_loaded
-    lock.release()
+    try:
+        with open(checkpoint_path, 'rb') as check_file:
+            crawler_loaded = pickle.load(check_file)
+            _, _, _, inv_index = crawler_loaded
+    except Exception as err:
+        print(err)
+    finally:
+        lock.release()
 
     preprocessed_query = TextUtils.handle(query)
     query_info = {}
@@ -53,7 +60,7 @@ def process(query, lock, checkpoint_path, descr_file):
     tf = gather_info(query_info)  # td[doc][word]
     urls = get_id_url(descr_file)
     cnt_docs = len(urls)
-    idf = dict([(word, math.log(1.0*cnt_docs/len(query_info[word]))) for word in query_info]) # idf[word]
+    idf = dict([(word, math.log(1.0*cnt_docs/len(query_info[word]))) for word in query_info if len(query_info[word]) != 0]) # idf[word]
     docs = gather_info(query_info)
 
     score = {}  # BM25
@@ -81,6 +88,31 @@ def process(query, lock, checkpoint_path, descr_file):
         print("Can't find anything for query {}".format(query))
 
     ranking_docs = sorted(score, key=score.get, reverse=True)
-    for i in range(min(10, len(ranking_docs))):
+
+    best_urls = []
+    for i in range(min(15, len(ranking_docs))):
         url = urls[ranking_docs[i]]
+        result = url + "\t"
+
+        # get snippet text
+        page = Page(url)
+        page.retrieve()
+        text = page.get_text()
+        for word in preprocessed_query:
+            context = TextUtils.search(word, text, 4)
+            if context is None:
+                continue
+            for w in context:
+                if w != word:
+                    result += w + " "
+                else:
+                    result += "<span style=\"color: #00a93b;font-weight:bold\">" + w + "</span>"
+            result += "\n"
+
         print(url)
+        print(result)
+        best_urls.append(result)
+
+    if len(best_urls) == 0:
+        return '2\n\n' + "Can't find result on this query."
+    return '1\n\n' + config.get_map_access_token() + '\n\n' + '\n'.join(best_urls)

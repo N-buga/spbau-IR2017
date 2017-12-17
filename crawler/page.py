@@ -1,3 +1,5 @@
+from copy import copy
+
 import requests
 import time
 import re
@@ -20,7 +22,7 @@ class Page:
     DEFAULT_WAIT_TIME = 0.5  # 0.5 second
 
     def __init__(self, url, crawl_delay=None):
-        from crawler.crawler import Crawler
+        from crawler import crawler
         self.url = url
         self.headers = {
             'User-Agent': Crawler.USERAGENT
@@ -35,8 +37,8 @@ class Page:
             session.trust_env = False  # Don't read proxy settings from OS
             self._page = session.get(self.url, headers=self.headers)
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError,
-                requests.exceptions.InvalidSchema, requests.exceptions.ChunkedEncodingError):
-            print("[PAGE -- retrieve] exception")
+                requests.exceptions.InvalidSchema, requests.exceptions.ChunkedEncodingError) as err:
+            print("[PAGE -- retrieve] exception", err)
             return False
         time_to_wait = self.DEFAULT_WAIT_TIME
         if self.crawl_delay is not None:
@@ -49,7 +51,8 @@ class Page:
             self.soup = None
             return False
         self.soup = BeautifulSoup(self._page.content, 'lxml')
-        for tag in self.soup.find_all(['aside', 'form', 'input', 'menu', 'menuitem', 'dialog']):
+        self.main_soup = BeautifulSoup(self._page.content, 'lxml')
+        for tag in self.main_soup.find_all(['aside', 'form', 'input', 'menu', 'menuitem', 'dialog', 'footer']):
             tag.replaceWith('')
         return True
 
@@ -85,7 +88,7 @@ class Page:
             return ""
         strings = []
 
-        for div in self.soup.find_all(['div', 'span', 'body']):
+        for div in self.main_soup.find_all(['div', 'span', 'body']):
             strings.extend([string for string in div.stripped_strings if
                             string != "" and re.search(r'[<>{}=\[\]\|]', string) is None])
         text = "\n".join(strings)

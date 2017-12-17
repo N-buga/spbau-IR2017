@@ -3,13 +3,14 @@ import psycopg2
 
 
 class TableWrapper:
-    # Need to be overrided
+    # Need to be overridden
     TABLE_NAME = None
     command_check_table_exists = None
     command_create_table = None
 
     def __init__(self):
         try:
+            print(config.get_user(), config.get_password())
             self.conn = psycopg2.connect('dbname=test user={} password={}'.
                                          format(config.get_user(), config.get_password()))
             self.conn.autocommit = True
@@ -168,12 +169,15 @@ class EntityTableWrapper(TableWrapper):
     def update_row(self, new_row):
         cur = self.conn.cursor()
         try:
+            print(new_row)
+            print(new_row[0], new_row[1], new_row[2], new_row[3], new_row[4], new_row[5], new_row[6], new_row[7], new_row[8])
             cur.execute(
                 """
                 UPDATE {} SET url_id=%s, url=%s, event_type=%s, event_time=%s, event_date=%s,\
                 price=%s, city=%s, venue=%s, event_name=%s
                 WHERE url_id=%s
-                """.format(self.TABLE_NAME), (new_row[0], new_row[1], new_row[2], new_row[3], new_row[4], new_row[5], new_row[6], new_row[7], new_row[8], new_row[9], new_row[0])
+                """.format(self.TABLE_NAME),
+                (new_row[0], new_row[1], new_row[2], new_row[3], new_row[4], new_row[5], new_row[6], new_row[7], new_row[8], new_row[0])
             )
             return True
         except Exception as err:

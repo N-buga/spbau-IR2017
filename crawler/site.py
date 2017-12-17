@@ -93,7 +93,7 @@ class Site:
 
     # returns the first url which needs update (if any) or just hasn't been inspected yet
     def next_updated_url(self):
-        if self.cnt_urls == 0:
+        if len(self.cnt_urls) == 0:
             return None
         # setup
         if self.iter in self.free_numbers:
