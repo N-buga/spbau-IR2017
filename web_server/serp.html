@@ -21,6 +21,23 @@
     background: #555; 
 }
 
+#mapid {
+    height: 400px;
+    width: 100%;
+}
+
+.ml15 {
+  font-weight: 800;
+  font-size: 3.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.5em;
+}
+
+.ml15 .word {
+  display: inline-block;
+  line-height: 1em;
+}
+
 form {
   margin: 0 auto;
   width: 420px;
@@ -78,110 +95,80 @@ button {
 <head>
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
     <meta charset=utf-8>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+   integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+   crossorigin=""/>
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+   integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+   crossorigin=""></script>
 </head>
-<body>
+<body bgcolor="#8effbb">
 <center>
 
-<h2>Search entertainment!</h2>
-<form>
-<input type="search" id="mySearch" placeholder="Search for something..">
-<button onclick="sendQuery(); return false;">Try it</button>
-    <select name="City" id="city">
-    <option value=""> Выберите город </option>
-    <option value="">Адыгея</option>
-    <option value="">Анадыр</option>
-    <option value="">Архангельск</option>
-    <option value="">Астрахань</option>
-    <option value="">Барнаул</option>
-    <option value="">Белгород</option>
-    <option value="">Благовещенск</option>
-    <option value="">Брянск</option>
-    <option value="">Великий Новгород</option>
-     <option value="">Владивосток</option>
-     <option value="">Владикавказ</option>
-     <option value="">Владимир</option>
-     <option value="">Волгоград</option>
-     <option value="">Вологда</option>
-     <option value="">Воронеж</option>
-     <option value="">Горно-Алтайск</option>
-     <option value="">Грозный</option>
-     <option value="">Екатеринбург</option>
-     <option value="">Ивановск</option>
-     <option value="">Ижевск</option>
-     <option value="">Иркутск</option>
-     <option value="">Йошкар-Ола</option>
-     <option value="">Казань</option>
-     <option value="">Калуга</option>
-     <option value="">Кемеровск</option>
-     <option value="">Кировск</option>
-     <option value="">Кострома</option>
-     <option value="">Краснодар</option>
-     <option value="">Красноярск</option>
-     <option value="">Курск</option>
-     <option value="">Кызыл</option>
-     <option value="">Липетск</option>
-     <option value="">Магаданск</option>
-     <option value="">Махачкала</option>
-     <option value="">Москва</option>
-     <option value="">Мурманск</option>
-     <option value="">Нальчик</option>
-     <option value="">Нижний Новгород</option>
-     <option value="">Новосибирск</option>
-     <option value="">Омск</option>
-     <option value="">Орел</option>
-     <option value="">Оренбург</option>
-     <option value="">Пенза</option>
-     <option value="">Пермь</option>
-     <option value="">Петрозаводск</option>
-     <option value="">Петропавловск-Камчатск</option>
-     <option value="">Псков</option>
-     <option value="">Ростов</option>
-     <option value="">Ростов-на-Дону</option>
-     <option value="">Рязань</option>
-     <option value="">Самарск</option>
-     <option value="">Санкт-Петербург</option>
-     <option value="">Саранск</option>
-     <option value="">Саратов</option>
-     <option value="">Саха</option>
-     <option value="">Смоленск</option>
-     <option value="">Ставрополь</option>
-     <option value="">Сыктывкар</option>
-     <option value="">Тамбов</option>
-     <option value="">Тверь</option>
-     <option value="">Томск</option>
-     <option value="">Тула</option>
-     <option value="">Тюмень</option>
-     <option value="">Улан - Уде</option>
-     <option value="">Ульяновск</option>
-     <option value="">Уфа</option>
-     <option value="">Хабаровск</option>
-     <option value="">Ханты-Мантийск</option>
-     <option value="">Чебоксары</option>
-     <option value="">Челябинск</option>
-     <option value="">Черкесск</option>
-     <option value="">Чита</option>
-     <option value="">Южно-Сахалинск</option>
-     <option value="">Ярославль</option>
-</select>
+<!-- <h2>Search entertainment!</h2> -->
+<h1 class="ml15">
+  <span class="word">Where</span>
+  <span class="word">are</span>
+  <span class="word">you</span>
+  <span class="word">going</span><br>
+  <span class="word">today?</span>
+</h1>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+<script>
+    anime.timeline()
+      .add({
+        targets: '.ml15 .word',
+        scale: [14,1],
+        opacity: [0,1],
+        easing: "easeOutExpo",
+        //duration: 800,
+        delay: function(el, i) {
+          return 800 * i;
+        }
+      }).add({
+        targets: '.ml15',
+        opacity: 0.5,
+        duration: 1000,
+        easing: "easeOutExpo",
+        delay: 1000
+      });
+</script>
+
+<form>
+<input type="search" id="mySearch" style="background-color: #8effbb">
+<button onclick="sendQuery(); return false;">Try it</button>
+    <select name="City" id="city" style="color: #888888">
+        <option value=""> Выберите город </option>
+        <option value="58.525403,31.272766">Великий Новгород</option>
+        <option value="56.825540,60.615795">Екатеринбург</option>
+        <option value="55.750565,37.617389">Москва</option>
+        <option value="68.963817,33.078280">Мурманск</option>
+        <option value="58.009938,56.266548">Пермь</option>
+        <option value="59.942888,30.303804">Санкт-Петербург</option>
+        <option value="61.664419,50.834306">Сыктывкар</option>
+        <option value="55.157894,61.410630">Челябинск</option>
+    </select>
 </form>
 
-    <script src="update.js">
-    </script>
+<script src="update.js"></script>
 
 </center>
 
 <div id="container">
     <div id="messages" style="color: red; font-size: 24px;"></div>
     <ul id="serp-list">
-        <li class="snippet">
-        <a href=https://www.w3schools.com/html/html_links.asp>https://www.w3schools.com/html/html_links.asp</a>
-        </li>
-        <li class="snippet">
-        <a href=https://github.com/LizaTretyakova/QuestionAnsweringSystem/blob/web-service/web_application/QAS.js>https://github.com/LizaTretyakova/QuestionAnsweringSystem/blob/web-service/web_application/QAS.js</a>
-        </li>
+        <!--<li class="snippet">-->
+        <!--<a href=https://www.w3schools.com/html/html_links.asp>https://www.w3schools.com/html/html_links.asp</a>-->
+        <!--</li>-->
+        <!--<li class="snippet">-->
+        <!--<a href=https://github.com/LizaTretyakova/QuestionAnsweringSystem/blob/web-service/web_application/QAS.js>https://github.com/LizaTretyakova/QuestionAnsweringSystem/blob/web-service/web_application/QAS.js</a>-->
+        <!--</li>-->
     </ul>
 </div>
+
+<div id="mapid"></div>
 
 </body>
 </html>

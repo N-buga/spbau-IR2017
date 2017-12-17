@@ -2,7 +2,6 @@ import json
 import logging
 import os
 
-
 logging.basicConfig(level=logging.DEBUG,
                     format='%(filename)-17s: '
                            '[%(levelname)-8s:] '
@@ -32,3 +31,9 @@ def get_user():
 def get_entertainments_words():
     with open(os.path.join(os.path.dirname(__file__), 'dosug_words.txt'), 'r', encoding='utf-8') as file_from:
         return file_from.read().split()
+
+
+def get_map_access_token():
+    with open(os.path.join(os.path.dirname(__file__), 'map_config.json'), 'r') as f:
+        info = json.load(f)
+        return info['access_token']

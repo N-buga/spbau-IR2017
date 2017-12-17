@@ -28,7 +28,7 @@ if __name__ == "__main__":
     descr_file = 'descr.txt'
 
     seeds = ['https://afisha.yandex.ru/', 'https://kudago.com']
-    pages_bound = 100000
+    pages_bound = 300  # 100000
     lock = ctx.Lock()
 
     if checkpoints_name not in os.listdir(dir_checkpoints):

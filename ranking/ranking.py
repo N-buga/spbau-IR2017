@@ -6,6 +6,7 @@ import math
 from storage.database_wrapper import FileAttributeTableWrapper
 from storage.text_handling import TextUtils
 from crawler.page import Page
+import config
 
 
 def get_id_url(descr_file):
@@ -105,7 +106,7 @@ def process(query, city, lock, checkpoint_path, descr_file):
                 if w != word:
                     result += w + " "
                 else:
-                    result += "<span style=\"color:blue;font-weight:bold\">" + w + "</span>"
+                    result += "<span style=\"color: #00a93b;font-weight:bold\">" + w + "</span>"
             result += "\n"
 
         print(url)
@@ -114,4 +115,4 @@ def process(query, city, lock, checkpoint_path, descr_file):
 
     if len(best_urls) == 0:
         return '2\n\n' + "Can't find result on this query."
-    return '1\n\n' + '\n'.join(best_urls)
+    return '1\n\n' + config.get_map_access_token() + '\n\n' + '\n'.join(best_urls)
