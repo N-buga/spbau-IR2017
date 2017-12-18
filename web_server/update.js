@@ -46,7 +46,7 @@ function sendQuery() {
     console.log(query);
     var place = document.getElementById("serp-list");
 
-    var connection = new WebSocket('ws://localhost:9999');
+    var connection = new WebSocket('https://8b7a8020.ngrok.io');
     connection.onopen = function () {
         place.textContent = "Selecting the best events...";
         connection.send(city + "\n" + query);
