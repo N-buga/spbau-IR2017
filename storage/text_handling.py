@@ -25,7 +25,7 @@ class TextUtils: # TODO: cool name
                 word[0] not in string.punctuation]
 
     @staticmethod
-    def stem(words, locale):
+    def stem(words, locale='russian'):
         stemmer = SnowballStemmer(locale)
         return [stemmer.stem(word) for word in words]
 
@@ -40,15 +40,17 @@ class TextUtils: # TODO: cool name
         )
 
     @staticmethod
-    def search(target, text, context=6):
+    def search(target, only_words, preprocessed_text, context=6):
         # also we get rid of the punctuation
-        words = re.findall(r'\w+', text)
 
-        matches = (i for (i,w) in enumerate(words) if w.lower() == target)
+        # words = re.findall(r'\w+', ' '.join(preprocessed_text))
+
+        matches = (i for (i, w) in enumerate(preprocessed_text) if w.lower() == target)
         for index in matches:
             if index < context //2:
-                return words[0:context+1]
-            elif index > len(words) - context//2 - 1:
-                return words[-(context+1):]
+                return only_words[0:context+1], index
+            elif index > len(only_words) - context//2 - 1:
+                return only_words[-(context+1):], index - (context + 1)
             else:
-                return words[index - context//2:index + context//2 + 1]
+                return only_words[index - context//2:index + context//2 + 1], context//2
+        return [], 0

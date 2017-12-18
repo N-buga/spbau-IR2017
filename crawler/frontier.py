@@ -1,9 +1,7 @@
-from crawler.url_queue import UrlQueue
-
-
 class Frontier:
     def __init__(self, seed_urls, docs_bound):
         self.cnt_added = 0
+        from crawler.url_queue import UrlQueue
         self.queue = UrlQueue()
         for seed_url in seed_urls:
             self.queue.add_url(seed_url)

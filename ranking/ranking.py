@@ -1,12 +1,26 @@
 import os
 import pickle
+from functools import partial
 
 import math
 
-from storage.database_wrapper import FileAttributeTableWrapper
+from storage.database_wrapper import FileAttributeTableWrapper, EntityTableWrapper
 from storage.text_handling import TextUtils
 from crawler.page import Page
 import config
+
+
+table = EntityTableWrapper()
+eng = {
+    'Санкт-Петербург': 'saint-petersburg',
+    'Великий Новгород': 'veliky novgorod',
+    'Екатеринбург': 'yekaterinburg',
+    'Москва': 'moscow',
+    'Мурманск': 'murmansk',
+    'Пермь': 'perm',
+    'Сыктывкар': 'syktyvkar',
+    'Челябинск': 'сhelyabinsk'
+}
 
 
 def get_id_url(descr_file):
@@ -46,6 +60,7 @@ def process(query, city, lock, checkpoint_path, descr_file):
             _, _, _, inv_index = crawler_loaded
     except Exception as err:
         print(err)
+        return '0\nPlease, wait until we gather some content. Try again later.'
     finally:
         lock.release()
 
@@ -87,7 +102,15 @@ def process(query, city, lock, checkpoint_path, descr_file):
     if len(score) == 0:
         print("Can't find anything for query {}".format(query))
 
-    ranking_docs = sorted(score, key=score.get, reverse=True)
+    ranking_docs_without_city = sorted(score, key=score.get, reverse=True)
+    if city != 'Выберите город':
+        ranking_docs = []
+        for doc in ranking_docs_without_city:
+            doc_city = table.get_row(doc)[6]
+            if doc_city is not None and doc_city.lower() == eng[city]:
+                ranking_docs.append(doc)
+    else:
+        ranking_docs = ranking_docs_without_city
 
     best_urls = []
     for i in range(min(15, len(ranking_docs))):
@@ -97,19 +120,20 @@ def process(query, city, lock, checkpoint_path, descr_file):
         # get snippet text
         page = Page(url)
         page.retrieve()
-        text = page.get_text()
+        row_text = TextUtils.text_to_words(page.get_row_text())
+        only_words = TextUtils.only_words(row_text)
+        preprocessed_text = TextUtils.stem(only_words)
         for word in preprocessed_query:
-            context = TextUtils.search(word, text, 4)
+            context, index = TextUtils.search(word, only_words, preprocessed_text, 4)
             if context is None:
                 continue
-            for w in context:
-                if w != word:
+            for ind, w in enumerate(context):
+                if ind != index:
                     result += w + " "
                 else:
                     result += "<span style=\"color: #00a93b;font-weight:bold\">" + w + "</span>"
             result += "\n"
 
-        print(url)
         print(result)
         best_urls.append(result)
 

@@ -1,5 +1,3 @@
-from copy import copy
-
 import requests
 import time
 import re
@@ -9,10 +7,11 @@ import dateutil.parser as dparser
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from readability.readability import Document
+
 from geotext import GeoText
 
 from storage.text_handling import TextUtils
-
+from config import get_crawler_name
 
 def is_absolute(url):
     return bool(urlparse(url).netloc)
@@ -22,10 +21,9 @@ class Page:
     DEFAULT_WAIT_TIME = 0.5  # 0.5 second
 
     def __init__(self, url, crawl_delay=None):
-        from crawler import crawler
         self.url = url
         self.headers = {
-            'User-Agent': Crawler.USERAGENT
+            'User-Agent': get_crawler_name()
         }
         self.soup = None
         self.crawl_delay = crawl_delay
@@ -83,7 +81,7 @@ class Page:
                 return False
         return True
 
-    def get_text(self):
+    def get_row_text(self):
         if self.soup is None:
             return ""
         strings = []
@@ -92,6 +90,10 @@ class Page:
             strings.extend([string for string in div.stripped_strings if
                             string != "" and re.search(r'[<>{}=\[\]\|]', string) is None])
         text = "\n".join(strings)
+        return text
+
+    def get_text(self):
+        text = self.get_row_text()
         preprocessed_text = TextUtils.handle(text)
         return ' '.join(preprocessed_text)
 

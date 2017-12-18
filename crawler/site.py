@@ -8,7 +8,7 @@ from urllib.error import URLError
 import email.utils as eutils
 import datetime
 
-from crawler import crawler
+from crawler.crawler import Crawler
 from config import get_log
 
 class Site:
@@ -31,7 +31,7 @@ class Site:
             session = requests.Session()
             session.trust_env = False  # Don't read proxy settings from OS
             r_headers = session.head(url, timeout=Site._RESPONSE_HEADER_TIMEOUT,
-                                     headers={'User-Agent': crawler.Crawler.USERAGENT})
+                                     headers={'User-Agent': Crawler.USERAGENT})
         except ConnectionError as err:
             get_log().error(err)
             return None

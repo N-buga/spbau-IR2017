@@ -2,6 +2,8 @@ import json
 import logging
 import os
 
+USERAGENT = 'loaferspider'
+
 logging.basicConfig(level=logging.DEBUG,
                     format='%(filename)-17s: '
                            '[%(levelname)-8s:] '
@@ -37,3 +39,7 @@ def get_map_access_token():
     with open(os.path.join(os.path.dirname(__file__), 'map_config.json'), 'r') as f:
         info = json.load(f)
         return info['access_token']
+
+
+def get_crawler_name():
+    return USERAGENT
