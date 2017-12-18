@@ -74,15 +74,28 @@ function sendQuery() {
                     console.log("i: ", i, " results.length: ", results.length);
 
                     new_result = results[i].split("\t"); // it should give a two-element array
-                    new_url = new_result[0];
-                    new_context = new_result[1].split("\n");
+                    if(new_result.length == 0) {
+                        continue;
+                    }
 
+                    new_url = new_result[0];
                     console.log("new_url: ", new_url);
-                    console.log("new_context: ", new_context);
 
                     var url = document.createElement("a");
                     url.setAttribute("href", new_url);
                     url.textContent = new_url;
+
+                    var newElement = document.createElement("li");
+                    newElement.setAttribute("class", "snippet");
+                    newElement.appendChild(url);
+
+                    if(new_result.length == 1) {
+                        place.appendChild(newElement);
+                        continue;
+                    }
+
+                    new_context = new_result[1].split("\n");
+                    console.log("new_context: ", new_context);
 
                     var context = document.createElement("div");
                     for(var j = 0; j < new_context.length; j++) {
@@ -112,12 +125,7 @@ function sendQuery() {
                         context.appendChild(el3);
                         context.appendChild(document.createElement("br"));
                     }
-
-                    var newElement = document.createElement("li");
-                    newElement.setAttribute("class", "snippet");
-                    newElement.appendChild(url);
                     newElement.appendChild(context);
-
                     place.appendChild(newElement);
                 }
                 initMap(access_token);

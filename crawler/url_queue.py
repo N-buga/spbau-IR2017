@@ -11,7 +11,8 @@ class UrlQueue:
 
     def add_url(self, url):
         cnt_added = 0
-        parsed_url = parse.urlparse(url)
+        row_url = url.split('?')[0]
+        parsed_url = parse.urlparse(row_url)
         hostname = parsed_url.hostname
         scheme = parsed_url.scheme
         if hostname not in self.sites.keys():
@@ -25,7 +26,7 @@ class UrlQueue:
         else:
             site = self.sites[hostname]
 
-        if site.update_urls(url):
+        if site.update_urls(row_url):
             self.site_queue.append(site)
             cnt_added += 1
 
@@ -48,11 +49,12 @@ class UrlQueue:
         return len(self.site_queue) != 0
 
     def add_url_if_site_exists(self, url):
-        parsed_url = parse.urlparse(url)
+        row_url = url.split('?')[0]
+        parsed_url = parse.urlparse(row_url)
         hostname = parsed_url.hostname
         if hostname in self.sites.keys():
             site = self.sites[hostname]
-            result =  site.update_urls(url)
+            result =  site.update_urls(row_url)
             if result:
                 self.site_queue.append(site)
             return result

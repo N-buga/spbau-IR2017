@@ -11,7 +11,6 @@ from web_server.web_server import WebServer
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from crawler.launch import launch
-from ranking.ranking import process
 
 ctx = mp.get_context('spawn')
 

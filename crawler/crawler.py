@@ -5,7 +5,7 @@ from shutil import copyfile
 import _pickle
 import hashlib
 
-from config import get_log,get_entertainments_words
+from config import get_log, get_entertainments_words, get_crawler_name
 from crawler.page import Page
 from crawler.page import url_retriever_factory
 from storage.inverted_index import Document
@@ -14,8 +14,6 @@ from storage.text_handling import TextUtils
 
 
 class Crawler:
-    USERAGENT = 'loaferspider'
-
     def __init__(self, frontier, dir_to_save, dir_checkpoints, checkpoints_name, lock, inv_index, file_description):
         self.dir_checkpoints = dir_checkpoints
         self.frontier = frontier
@@ -55,7 +53,7 @@ class Crawler:
                 continue
             get_log().debug(current_url)
             website.read_robots_txt()
-            website_delay = website.get_crawl_delay(self.USERAGENT)
+            website_delay = website.get_crawl_delay(get_crawler_name())
             page = Page(current_url, website_delay)
             if not page.retrieve():
                 self.frontier.remove_url(current_url)
